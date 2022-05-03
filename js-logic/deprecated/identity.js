@@ -1,9 +1,5 @@
-// get instance of dpp
-const DashPlatformProtocol = require('@dashevo/dpp');
-const dpp = new DashPlatformProtocol();
-// get dashes interpretation of InstantLock
-const InstaLock = require('@dashevo/dashcore-lib/lib/instantlock/instantlock');
-
+// get dashcore library
+const DashCore = require('@dashevo/dashcore-lib');
 
 /******************************************************************************/
 // type:
@@ -25,13 +21,13 @@ function getPubKeyEntry (public_key, k_type) {
 
 
 /******************************************************************************/
-async function callDPP (instantLockObject, transaction, publicKey) {
+async function callDPP (dpp, instantLockObject, transaction, publicKey) {
   await dpp.initialize();
   // TODO find out how the instalock OBJECT needs to look like
-  const insLock = InstaLock.fromObject(instantLockObject);
+  const insLock = DashCore.InstantLock.fromObject(instantLockObject);
   const asset = dpp.identity.createInstantAssetLockProof(insLock, transaction, 0)
   const identity = dpp.identity.create(asset, [ getPubKeyEntry(publicKey) ]);
-  console.log(identity);
+  return identity;
 }
 /******************************************************************************/
 
