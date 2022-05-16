@@ -2,65 +2,62 @@ const Dash = require('dash');
 const fs = require('fs');
 
 const identity = require('./identity');
+const c = require('./client');
+const contract = require('./contract');
+const document = require('./document');
 /******************************************************************************/
 
 
 /******************************************************************************/
 const main = async () => {
-	var start;
-	var time;
-	var output;
+	// not time sensitive, as it is preparational and takes milliseconds
+	const client = c.getClient();
+
+
+	var newidentity;
+	try {
+		newidentity = await identity.register(client)
+	} catch (err) {
+		console.log(err);
+		c.closeClient();
+		return;
+	}
+	const id = newidentity.id;
+
+
+	try {
+		await identity.topup(client, id, 1)
+	} catch (err) {
+		console.log(err);
+		c.closeClient();
+		return;
+	}
 
 	
-	start = process.hrtime();
-	const client = new Dash.Client(
-		{
-			network: 'testnet',
-			wallet: {
-				mnemonic: 'loud autumn travel bird stairs fiscal position wild fashion mother above protect',
-				unsafeOptions: {
-					// TODO: Coudl this be a greater height to reduce received transactions?
-					skipSynchronizationBeforeHeight: 500000, // only sync from mid-2021
-				},
-			},
-	});
-	//await client.platform.initialize();
-	time = process.hrtime(start);
-	fs.writeFile('./outputs', "Time -- Client: " + (time[0] + time[1]/1000000000) + "\n", { flag: 'a+' }, err => {});
+	var contract_information;
+	try {
+		contract_information = await contract.create(client, await identity.get(client, id))
+	} catch (err) {
+		console.log(err);
+		c.closeClient();
+		return;
+	}
 
 
-	start = process.hrtime();
-		await client.platform.identities.register()
-			.then((d) => output = d);
-	time = process.hrtime(start);
-	fs.writeFile('./outputs', "Time -- Register: " + (time[0] + time[1]/1000000000) + "\n", { flag: 'a+' }, err => {});
-	console.log(output.balance);
-
-	start = process.hrtime();
-		await client.platform.identities.register()
-			//.then((d) => output = d);
-	time = process.hrtime(start);
-	fs.writeFile('./outputs', "Time -- Register: " + (time[0] + time[1]/1000000000) + "\n", { flag: 'a+' }, err => {});
-	//console.log(output.balance);
-
-
-	start = process.hrtime();
-		await client.platform.identities.topUp(output.id, 0.0001);
-	time = process.hrtime(start);
-	fs.writeFile('./outputs', "Time -- Topup: " + (time[0] + time[1]/1000000000) + "\n", { flag: 'a+' }, err => {});
-
-
-	var newb;
-	start = process.hrtime();
-		await client.platform.identities.get(output.id)
-			.then((d) => newb = d.balance);
-	time = process.hrtime(start);
-	fs.writeFile('./outputs', "Time -- Get: " + (time[0] + time[1]/1000000000) + "\n", { flag: 'a+' }, err => {});
-	console.log(newb);
+	//contract_information, id, type, data = {}
+	var document_info;
+	try {
+		document_info = await document.create(client, contract_information, id, 'string', { message: "text" })
+	} catch (err) {
+		console.log(err);
+		c.closeClient();
+		return;
+	}
+	console.log(document_info);
 	
 
-	fs.writeFile('./outputs', "END OF TEST\n", { flag: 'a+' }, err => {});
-	client.disconnect();
+	fs.writeFileSync('./outputs', "END OF TEST\n", { flag: 'a+' }, err => {});
+	c.closeClient();
 }
 
 
