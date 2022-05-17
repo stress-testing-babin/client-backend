@@ -1,7 +1,8 @@
 const fs = require('fs');
+const Identifier = require('@dashevo/dpp/lib/Identifier');
 
 
-async function create (client, identity) {
+async function create (client, identity, cname) {
 	var output;
 	var start = process.hrtime();
 		const contract = await client.platform.contracts.create({
@@ -23,6 +24,10 @@ async function create (client, identity) {
 			console.error(result);
 			throw result.errors[0];
 		}
+		/*await*/ client.getApps().set(cname, {
+			contractId: Identifier.from(contract.id),
+			contract: contract
+		});
 	var time = process.hrtime(start);
 	fs.writeFileSync('./outputs', "Time -- Create Contract: " + (time[0] + time[1]/1000000000) + "\n", { flag: 'a+' }, err => {});
 	console.log("Registered data contract");

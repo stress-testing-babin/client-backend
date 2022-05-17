@@ -20,6 +20,7 @@ const main = async () => {
 	} catch (err) {
 		console.log(err);
 		c.closeClient();
+		fs.writeFileSync('./outputs', "END OF TEST\n", { flag: 'a+' }, err => {});
 		return;
 	}
 	const id = newidentity.id;
@@ -30,34 +31,36 @@ const main = async () => {
 	} catch (err) {
 		console.log(err);
 		c.closeClient();
+		fs.writeFileSync('./outputs', "END OF TEST\n", { flag: 'a+' }, err => {});
 		return;
 	}
 
 	
+	const cname = 'cname';
 	var contract_information;
 	try {
-		contract_information = await contract.create(client, await identity.get(client, id))
+		contract_information = await contract.create(client, await identity.get(client, id), cname)
 	} catch (err) {
 		console.log(err);
 		c.closeClient();
+		fs.writeFileSync('./outputs', "END OF TEST\n", { flag: 'a+' }, err => {});
 		return;
 	}
 
 
-	//contract_information, id, type, data = {}
 	var document_info;
 	try {
-		document_info = await document.create(client, contract_information, id, 'string', { message: "text" })
+		document_info = await document.create(client, (cname + '.note'), await identity.get(client, id), { message: 'message' })
 	} catch (err) {
 		console.log(err);
 		c.closeClient();
+		fs.writeFileSync('./outputs', "END OF TEST\n", { flag: 'a+' }, err => {});
 		return;
 	}
-	console.log(document_info);
 	
 
-	fs.writeFileSync('./outputs', "END OF TEST\n", { flag: 'a+' }, err => {});
 	c.closeClient();
+	fs.writeFileSync('./outputs', "END OF TEST\n", { flag: 'a+' }, err => {});
 }
 
 
