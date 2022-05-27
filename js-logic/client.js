@@ -8,7 +8,7 @@ const client = new Dash.Client(
       mnemonic: 'loud autumn travel bird stairs fiscal position wild fashion mother above protect',
       unsafeOptions: {
         // TODO: Coudl this be a greater height to reduce received transactions?
-        skipSynchronizationBeforeHeight: 500000, // only sync from mid-2021
+        skipSynchronizationBeforeHeight: 600000, // only sync from mid-2021
       },
     },
 });

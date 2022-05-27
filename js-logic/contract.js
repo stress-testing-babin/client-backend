@@ -15,16 +15,16 @@ async function create (client, identity, cname) {
 					},
 					additionalProperties: false
 				}
-			}, identity);
+			}, identity);/*
 		await client.platform.dpp.initialize();
 		const result = await client.platform.dpp.dataContract.validate(contract);
-		if (result.isValid()) {
+		if (result.isValid()) {*/
 			output = await client.platform.contracts.publish(contract, identity);
-		} else {
+		/*} else {
 			console.error(result);
 			throw result.errors[0];
-		}
-		/*await*/ client.getApps().set(cname, {
+		}*/
+		client.getApps().set(cname, {
 			contractId: Identifier.from(contract.id),
 			contract: contract
 		});

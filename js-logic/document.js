@@ -12,7 +12,7 @@ async function create (client, name, id, properties) {
 		}, id);
 	var time = process.hrtime(start);
 	fs.writeFileSync('./outputs', "Time -- Create Document: " + (time[0] + time[1]/1000000000) + "\n", { flag: 'a+' }, err => {});
-	return output;
+	return doc;
 }
 
 

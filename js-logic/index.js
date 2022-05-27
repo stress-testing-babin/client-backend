@@ -9,58 +9,48 @@ const document = require('./document');
 
 
 /******************************************************************************/
+const cleanup = () => {
+	c.closeClient();
+	fs.writeFileSync('./outputs', "END OF TEST\n", { flag: 'a+' }, err => {});
+}
+/******************************************************************************/
+
+
+/******************************************************************************/
 const main = async () => {
 	// not time sensitive, as it is preparational and takes milliseconds
 	const client = c.getClient();
+	//TODO search any data for dapiAddress:DAPIAddress {...}
 
 
-	var newidentity;
-	try {
-		newidentity = await identity.register(client)
-	} catch (err) {
-		console.log(err);
-		c.closeClient();
-		fs.writeFileSync('./outputs', "END OF TEST\n", { flag: 'a+' }, err => {});
-		return;
-	}
-	const id = newidentity.id;
+	//var data = JSON.stringify({ 'id': id }, null, 2);
+	//fs.writeFileSync('id.json', data);
 
-
-	try {
-		await identity.topup(client, id, 1)
-	} catch (err) {
-		console.log(err);
-		c.closeClient();
-		fs.writeFileSync('./outputs', "END OF TEST\n", { flag: 'a+' }, err => {});
-		return;
-	}
-
-	
+	const FORCE_NEWID = false;	
 	const cname = 'cname';
-	var contract_information;
+
+
 	try {
-		contract_information = await contract.create(client, await identity.get(client, id), cname)
+		//get from data cache
+		let oldData = JSON.parse(fs.readFileSync('data.json'));
+		let Identity;
+		if (oldData.id == "" || FORCE_NEWID) {
+			Identity = await identity.register(client)
+			oldData.id = Identity.id;
+		} else {
+			Identity = await identity.get(client, oldData.id);
+		}
+		if (Identity.balance < 10000) await identity.topup(client, oldData.id, 1);
+		let contract_information = await contract.create(client, Identity, cname)
+		let document_info = await document.create(client, (cname + '.note'), Identity, { message: 'message' })
+		//write "new" data to cache
+		fs.writeFileSync('data.json', JSON.stringify(oldData));
+		console.log("Saved data to data.json");
 	} catch (err) {
 		console.log(err);
-		c.closeClient();
-		fs.writeFileSync('./outputs', "END OF TEST\n", { flag: 'a+' }, err => {});
-		return;
+	} finally {
+		cleanup();
 	}
-
-
-	var document_info;
-	try {
-		document_info = await document.create(client, (cname + '.note'), await identity.get(client, id), { message: 'message' })
-	} catch (err) {
-		console.log(err);
-		c.closeClient();
-		fs.writeFileSync('./outputs', "END OF TEST\n", { flag: 'a+' }, err => {});
-		return;
-	}
-	
-
-	c.closeClient();
-	fs.writeFileSync('./outputs', "END OF TEST\n", { flag: 'a+' }, err => {});
 }
 
 
