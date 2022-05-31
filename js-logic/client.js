@@ -10,7 +10,15 @@ const client = new Dash.Client(
         // TODO: Coudl this be a greater height to reduce received transactions?
         skipSynchronizationBeforeHeight: 600000, // only sync from mid-2021
       },
-    },
+    }/*,
+    seeds: [{
+      host: 'seed-1.testnet.networks.dash.org',
+      httpPort: 3000,
+      grpcPort: 3010
+    }],
+    dapiAddresses: [
+      '127.0.0.1:3000:3010'
+    ]*/
 });
 
 
