@@ -5,6 +5,7 @@ const identity = require('./identity');
 const c = require('./client');
 const contract = require('./contract');
 const document = require('./document');
+const { SSL_OP_EPHEMERAL_RSA } = require('constants');
 /******************************************************************************/
 
 
@@ -31,7 +32,7 @@ const main = async () => {
 		let oldData = JSON.parse(fs.readFileSync('data.json'));
 		let Identity;
 		if (oldData.id == "" || FORCE_NEWID) {
-			Identity = await identity.register(client)
+			Identity = await identity.register(client);
 			oldData.id = Identity.id;
 		} else {
 			Identity = await identity.get(client, oldData.id);
@@ -41,8 +42,9 @@ const main = async () => {
 		if (Identity.balance < 10000) await identity.topup(client, oldData.id, 1);
 		await contract.create(client, Identity, cname)
 		/**********************************************************************/
-		for (let i = 0; i < 10; ++i) {
+		for (let i = 0; i < 100; ++i) {
 			document.create(client, (cname + '.note'), Identity, { message: 'message' })
+			//await new Promise(resolve => setTimeout(resolve, 10000));
 			if (Identity.balance < 10000) await identity.topup(client, oldData.id, 1);
 		}
 		/**********************************************************************/
